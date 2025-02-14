@@ -40,9 +40,10 @@ class ProductResource extends Resource
                     ->required()
                     ->numeric(),
                 Forms\Components\FileUpload::make('image')
-                    ->disk('minio')
-                    ->directory('products')
-                    ->image()->nullable(),
+                    ->disk('local')  // Use the 'local' disk for non-public storage
+                    ->directory('products')  // Store in the 'products' directory
+                    ->image()  // Only accept images
+                    ->nullable(),  // Allow this field to be nullable
             ]);
     }
 
@@ -61,14 +62,12 @@ class ProductResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('image')
-                    ->disk('minio')
+                    ->disk('public')  // Assuming 'public' disk for publicly accessible images
                     ->url(function ($record) {
-                        // Check if image exists
-                        if ($record->image && Storage::disk('minio')->exists($record->image)) {
-                            return Storage::disk('minio')->url($record->image);
+                        if ($record->image && Storage::disk('public')->exists($record->image)) {
+                            return Storage::disk('public')->url($record->image);
                         }
-                        // Return default image URL if no image exists
-                        return asset('storage/default-image.jpg');
+                        return asset('storage/default-image.jpg');  // Default image if none exists
                     }),
                 Tables\Columns\TextColumn::make('deleted_at')
                     ->dateTime()

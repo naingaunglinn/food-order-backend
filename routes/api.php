@@ -21,8 +21,9 @@ Route::middleware('api')->group(function () {
     Route::get('/categories', function () {
         return CategoryResource::collection(Category::all());
     });
+
+    Route::post('/orders', [OrderController::class, 'store']);
 });
 
-Route::post('/request-otp', [OtpController::class, 'requestOtp']);
+// Route::post('/request-otp', [OtpController::class, 'requestOtp']);
 
-Route::post('/orders', [OrderController::class, 'store']);

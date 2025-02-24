@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('phone_number'); // Phone number for order authentication
+            $table->string('phone_number')->nullable(); // Phone number for order authentication
             $table->string('otp_code')->nullable(); // OTP for verification
             $table->decimal('total_price', 10, 2);
             $table->enum('status', ['pending', 'completed', 'canceled'])->default('pending');

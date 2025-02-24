@@ -49,22 +49,32 @@ return [
 
         's3' => [
             'driver' => 's3',
-            'key' => env('MINIO_ACCESS_KEY'), // your MinIO access key
-            'secret' => env('MINIO_SECRET_KEY'), // your MinIO secret key
-            'region' => 'us-east-1', // MinIO is regionless, you can use any region (default S3 region)
-            'bucket' => env('MINIO_BUCKET'),
-            'endpoint' => env('MINIO_ENDPOINT'), // Set MinIO endpoint here
-            'use_path_style_endpoint' => true, // Set this to true for MinIO
+            'version' => 'latest',
+            'region' => env('AWS_S3_REGION'),
+            'bucket' => env('AWS_S3_BUCKET'),
+            'url' => env('AWS_S3_URL', 'http://127.0.0.1:9000/static'),
+            'endpoint' => env('AWS_S3_ENDPOINT', ''),
+            'use_path_style_endpoint' => env('AWS_S3_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'public',
+            'credentials' => array(
+                'key' => env('AWS_S3_ACCESS_KEY'),
+                'secret' => env('AWS_S3_SECRET'),
+            ),
         ],
 
         'minio' => [
             'driver' => 's3',
-            'key' => env('MINIO_ACCESS_KEY'),
-            'secret' => env('MINIO_SECRET_KEY'),
-            'region' => 'us-east-1', // MinIO is regionless, you can use any region (default S3 region)
-            'bucket' => env('MINIO_BUCKET'),
-            'endpoint' => env('MINIO_ENDPOINT'),
-            'use_path_style_endpoint' => true,
+            'version' => 'latest',
+            'region' => env('AWS_S3_REGION'),
+            'bucket' => env('AWS_S3_BUCKET'),
+            'url' => env('AWS_S3_URL', 'http://127.0.0.1:9000/static'),
+            'endpoint' => env('AWS_S3_ENDPOINT', ''),
+            'use_path_style_endpoint' => env('AWS_S3_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'private',
+            'credentials' => array(
+                'key' => env('AWS_S3_ACCESS_KEY'),
+                'secret' => env('AWS_S3_SECRET'),
+            ),
         ],
 
     ],

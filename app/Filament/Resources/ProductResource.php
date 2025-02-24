@@ -10,7 +10,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -18,7 +17,7 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
 
     public static function form(Form $form): Form
     {
@@ -35,15 +34,15 @@ class ProductResource extends Resource
                 Forms\Components\TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->prefix('$'),
+                    ->prefix('MMK'),
                 Forms\Components\TextInput::make('stock')
                     ->required()
                     ->numeric(),
                 Forms\Components\FileUpload::make('image')
-                    ->disk('local')  // Use the 'local' disk for non-public storage
-                    ->directory('products')  // Store in the 'products' directory
-                    ->image()  // Only accept images
-                    ->nullable(),  // Allow this field to be nullable
+                    ->disk('local')                    
+                    ->directory('product')
+                    ->visibility('public')
+                    ->previewable(),
             ]);
     }
 
@@ -51,24 +50,17 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),                    
                 Tables\Columns\TextColumn::make('category.name')  // Display the category name
-                ->sortable(),
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('name')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('price')
                     ->money()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('stock')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\ImageColumn::make('image')
-                    ->disk('public')  // Assuming 'public' disk for publicly accessible images
-                    ->url(function ($record) {
-                        if ($record->image && Storage::disk('public')->exists($record->image)) {
-                            return Storage::disk('public')->url($record->image);
-                        }
-                        return asset('storage/default-image.jpg');  // Default image if none exists
-                    }),
+                Tables\Columns\ImageColumn::make('image'),
                 Tables\Columns\TextColumn::make('deleted_at')
                     ->dateTime()
                     ->sortable()
@@ -83,7 +75,7 @@ class ProductResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -91,6 +83,8 @@ class ProductResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
     }
@@ -109,5 +103,13 @@ class ProductResource extends Resource
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 }

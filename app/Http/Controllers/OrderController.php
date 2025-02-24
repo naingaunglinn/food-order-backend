@@ -16,9 +16,7 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             $order = Order::create([
-                'phone_number' => '09440410393',
                 'total_price' => $validated['total_price'],
-                'status' => 'pending',
             ]);
 
             foreach ($validated['products'] as $product) {
